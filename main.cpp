@@ -3,7 +3,7 @@
 int main(){
 	std::string tesla = "tesla.csv";
 	std::string nvidia = "nvda.csv";
-	std::string ayemdee = "amd.csv";
+	std::string amds = "amd.csv";
 	
 	stock nvda, amd, tsla;               		//Create stock objects
 	std::list<stock> stockList;			 		//Create list of stocks
@@ -20,7 +20,7 @@ int main(){
 	
 	it++;
 	
-	it->read_cv(ayemdee);
+	it->read_cv(amds);
 	it->setup_investment();
 	it->initiate_suggestion_system();
 	it->plot_stock();

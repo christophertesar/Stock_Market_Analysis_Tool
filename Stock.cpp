@@ -5,7 +5,7 @@ stock::stock(){
 
 }
 
-stock::~stock(){
+stock::~stock(){ //New not called
 
 }
 
@@ -28,15 +28,15 @@ void stock::read_cv(std::string filename){
 		return;
 	}
 
-	while(std::getline(file, line)){
+	while(std::getline(file, line)){ //Reads entire file
 		std::stringstream ss(line);
 		std::getline(ss, openVar, ',');
 		std::getline(ss, closeVar, ',');
 
-		open.push_back(std::stod(openVar));
+		open.push_back(std::stod(openVar)); //storing variables
 		close.push_back(std::stod(closeVar));
 	}
-	file.close();
+	file.close(); //finished
 }
 
 void stock::setup_investment(){
@@ -47,15 +47,17 @@ void stock::setup_investment(){
 }
 
 void stock::set_days(){
-	days = open.size();
+	for(int i = 0; i <= open.size(); i++){
+		days.push_back(i+1);
+	}
 }
 
 void stock::rsi(){
 	
 	for(int i = 0; i <= change.size() - 15; i++){
-		double negSum = 0;
+		double negSum = 0; //accumulates pos and neg over 14 day period
 		double posSum = 0;
-		double posChange = 0;
+		double posChange = 0; //accumulates number of positive days and neg. days
 		double negChange = 0;
 		changeIt = change.begin() + i;
 		
@@ -90,29 +92,25 @@ void stock::stochastic(){
 	for(int i = 0; i <= close.size() - 14; i++){                                          //int i for index from close.begin() up to close vector size minus 14
 		closeIt = std::max_element(close.begin() + i, close.begin() + i + 14);
 		max = *closeIt;
-		//std::cout << max << std::endl;
 		closeIt = std::min_element(close.begin() + i, close.begin() + i + 14);
 		min = *closeIt;
-		//std::cout << min << std::endl;
 		closeIt = close.begin() + i + 13;
 		closeDay = *closeIt;
 		stochVal = ((closeDay - min)/(max - min)) * 100 ;
 		stoch.push_back(stochVal);
 	}
-	//std::cout << stoch.size() << std::endl;
-	//for(int i=0; i < stoch.size(); i++)
-	//	std::cout << stoch.at(i) << std::endl;
 }
+
 
 void stock::calc_change(){
 
 	change.resize(open.size());
-	std::transform(close.begin(),close.end(),open.begin(),change.begin(),std::minus<double>());
-	//for(int i=0; i < change.size(); i++)
-	//	std::cout << change.at(i) << std::endl;
+	std::transform(close.begin(),close.end(),open.begin(),change.begin(),std::minus<double>()); //inputs subtract results into vector change
+
 		
 }
 
+//Precondition:          Postcondition:Correct results calculated, Buy sell hold suggestions generated, RSI and Stoch. values calculated.
 void stock::initiate_suggestion_system(){
 	
 	gen_suggestions();
@@ -121,6 +119,7 @@ void stock::initiate_suggestion_system(){
 
 }
 
+//Precondition: csv file has been read and has open/close values. //Postcondition: RSI and Stoch. values are calculated.
 void stock::gen_suggestions(){
 
 	stochIt = stoch.begin();
@@ -151,6 +150,7 @@ void stock::gen_suggestions(){
 	//}
 }
 
+//Precondition: csv file has been read        Postcondition:Buy and Sell suggestions have been compared.
 void stock::compare_suggestions(){
 	
 	suggestionsIt = suggestions.begin(); //starts at day n or day 14
@@ -158,13 +158,9 @@ void stock::compare_suggestions(){
 	
 	for(int i = 0; i < suggestions.size(); i++){
 		if((*suggestionsIt == -1) && (*changeIt < 0)){
-			//std::cout << *suggestionsIt << std::endl;
-			//std::cout << *changeIt << std::endl;
 			correct++;
 		}
 		else if((*suggestionsIt == 1) && (*changeIt > 0)){
-			//std::cout << *suggestionsIt << std::endl;
-			//std::cout << *changeIt << std::endl;
 			correct++;
 		}
 		else if((*suggestionsIt == 1) && (*changeIt < 0)){
@@ -176,10 +172,8 @@ void stock::compare_suggestions(){
 		suggestionsIt++;
 		changeIt++;
 	}
-	//std::cout << correct << std::endl;
-	//std::cout << wrong << "\n" << std::endl;
 }
-
+//Precondition: suggestions have been compared.   //Postconditions: Percentages have been calculated and output into terminal.
 void stock::get_trend(int correct, int wrong){
 
 	double correctD = correct;
@@ -203,6 +197,7 @@ void stock::get_trend(int correct, int wrong){
 	
 }
 
+//Precondition: Stochastic and RSI values have been calculated.   Postcondition: Graphs have been output onto screen.
 void stock::plot_stock(){
 	
 	try{
@@ -220,8 +215,7 @@ void stock::plot_stock(){
 		Gnuplot r("lines");
 		r.set_title("RSI Plot");
 		r.set_ylabel("RSI (%)");
-		r.set_xlabel("Time (Days)");
-		
+		r.set_xlabel("Time (Days)");	
 		r.plot_x(rsi_val,"RSI Values");
 		r.showonscreen();
 		
